@@ -1,0 +1,84 @@
+---
+- hosts: all
+  become: true
+
+  pre_tasks:
+    - name: Update apt-get cache if needed
+      apt: 
+        update_cache: yes 
+        cache_valid_time: 3600
+
+  handlers:
+    - name: restart nginx
+      service: name=nginx state=restarted
+  
+
+- hosts: loadbalancer
+  become: true
+  tasks:
+    - name: Download Nginx signing key
+      get_url:
+        url: http://nginx.org/keys/nginx_signing.key
+        dest: /home/vagrant
+    
+    - name: Add key in apt-get repo
+      command: apt-key add nginx_signing.key
+
+    - name: Add nginx to package
+      copy:
+        src: ./sources.list
+        dest: /etc/apt/sources.list
+
+    - name: Update apt-get repo
+      apt: 
+        update_cache: yes
+    
+    - name: "Install nginx web server"
+      apt:
+        state: present
+        name: nginx
+    
+    - name: Start nginx
+      service: name=nginx state=started
+    
+    - name: Rename default nginx conf file
+      command: mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.bak
+    
+    - name: Copy nginx server file
+      copy:
+        src: ./server.conf
+        dest: /etc/nginx/conf.d/server.conf
+   
+    - name: Copy nginx http file
+      copy:
+        src: ./nginx.conf
+        dest: /etc/nginx/nginx.conf
+
+    - name: Create webserver root dir 
+      file:
+        path: /home/vagrant/public_html
+        state: directory
+        owner: "vagrant"
+
+    - name: Restart nginx
+      service: 
+        name: nginx
+        state: restarted
+      
+- hosts: backends
+  become: true
+  tasks:
+    - name: Install apache
+      apt:
+        name: apache2
+        state: present
+
+    - name: Start apache
+      service: name=apache2 state=started
+        
+    - name: Copy text into index page
+      command: echo "'This is the backend of {{ inventory_hostname }}' > /var/www/html/index.html"
+  
+  
+  
+      

@@ -1,0 +1,29 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+ENV["LC_ALL"] = "en_US.UTF-8"
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/xenial64"
+  config.ssh.insert_key = false
+
+  config.vm.provider "virtualbox" do |vb|
+   vb.memory = 256
+   vb.cpus   = 1
+  end
+  N = 3
+  (1..N).each do |i|
+    config.vm.define "node#{i}" do |node|
+      node.vm.hostname = "node#{i}"
+      node.vm.network :private_network, ip: "192.168.33.3#{i}"
+      
+      if i == N
+        # Provision all the VMs using Ansible after last VM is up.
+        node.vm.provision "ansible" do |ansible|
+          ansible.playbook = "ansible/playbook.yml"
+          ansible.inventory_path = "ansible/inventory"
+          ansible.limit = "all"
+        end 
+      end
+    end
+  end
+end

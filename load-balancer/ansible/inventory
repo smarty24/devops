@@ -1,0 +1,21 @@
+[loadbalancer]
+192.168.33.31 
+
+[backend1]
+192.168.33.32
+
+[backend2]
+192.168.33.33 
+
+[backends:children]
+backend1
+backend2
+
+[loadbalancerandbackends:children]
+loadbalancer
+backends
+
+[loadbalancerandbackends:vars]
+ansible_ssh_user=vagrant
+ansible_ssh_private_key_file=~/.vagrant.d/insecure_private_key
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
