@@ -5,7 +5,10 @@
 192.168.33.32
 
 [backend2]
-192.168.33.33 
+192.168.33.33
+
+[database]
+192.168.33.34
 
 [backends:children]
 backend1
@@ -14,8 +17,9 @@ backend2
 [loadbalancerandbackends:children]
 loadbalancer
 backends
+database
 
-[loadbalancerandbackends:vars]
+[all:vars]
 ansible_ssh_user=vagrant
 ansible_ssh_private_key_file=~/.vagrant.d/insecure_private_key
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
