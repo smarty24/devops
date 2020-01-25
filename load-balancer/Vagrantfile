@@ -6,72 +6,28 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/xenial64"
   config.ssh.insert_key = false
 
-  config.vm.provider "virtualbox" do |lb|
-   lb.memory = 256
-   lb.cpus   = 1
-   lb.name   = "loadbalancer"
+  N = 2
+  (1..N).each do |i|
+    config.vm.define "node#{i}" do |node|
+      node.vm.hostname = "node#{i}"
 
-   config.vm.define "loadbalancer" do |lb|
-    lb.vm.hostname = "loadbalancer"
-    lb.vm.network :private_network, ip: "192.168.33.31"
-   end
-  end
+      config.vm.provider "virtualbox" do |vb|
+        vb.name   = "node#{i}"
+        vb.memory = 256
+        vb.cpus   = 1
+      end
 
-  config.vm.provider "virtualbox" do |app1|
-    app1.memory = 256
-    app1.cpus   = 1
-    app1.name   = "webserver1"
- 
-    config.vm.define "webserver1" do |app1|
-     lb.vm.hostname = "webserver1"
-     app1.vm.network :private_network, ip: "192.168.33.32"
-    end
-   end
-
-   config.vm.provider "virtualbox" do |app2|
-    app2.memory = 256
-    app2.cpus   = 1
-    app2.name   = "webserver2"
- 
-    config.vm.define "webserver2" do |app2|
-     app2.vm.hostname = "webserver2"
-     app2.vm.network :private_network, ip: "192.168.33.33"
-    end
-   end
-
-   config.vm.provider "virtualbox" do |appdb|
-    appdb.memory = 256
-    appdb.cpus   = 1
-    appdb.name   = "webdb"
- 
-    config.vm.define "webdb" do |appdb|
-     appdb.vm.hostname = "webdb"
-     appdb.vm.network :private_network, ip: "192.168.33.34"
-    end
-   end
-
-   config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "ansible/playbook.yml"
-      ansible.inventory_path = "ansible/inventory"
-      ansible.limit = "all" 
-      # ansible.verbose = true
-    end 
-
-  # N = 4
-  # (1..N).each do |i|
-  #   config.vm.define "node#{i}" do |node|
-  #     node.vm.hostname = "node#{i}"
-  #     node.vm.network :private_network, ip: "192.168.33.3#{i}"
+      node.vm.network :private_network, ip: "192.168.33.3#{i}"
       
-  #     if i == N
-  #       # Provision all the VMs using Ansible after last VM is up.
-  #       node.vm.provision "ansible" do |ansible|
-  #         ansible.playbook = "ansible/playbook.yml"
-  #         ansible.inventory_path = "ansible/inventory"
-  #         ansible.limit = "all" 
-  #         # ansible.verbose = true
-  #       end 
-  #     end
-  #   end
-  # end
+      # if i == N
+      #   # Provision all the VMs using Ansible after last VM is up.
+      #   node.vm.provision "ansible" do |ansible|
+      #     ansible.playbook = "ansible/playbook.yml"
+      #     ansible.inventory_path = "ansible/inventory"
+      #     ansible.limit = "all" 
+      #     # ansible.verbose = true
+      #   end 
+      # end
+    end
+  end
 end

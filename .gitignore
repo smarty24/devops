@@ -1,2 +1,3 @@
-./load-balancer/ubuntu-xenial-16.04-cloudimg-console.log
-./load-balancer/.vagrant
+
+load-balancer/.vagrant
+load-balancer/ubuntu-xenial-16.04-cloudimg-console.log
